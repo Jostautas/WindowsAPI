@@ -1,0 +1,22 @@
+#include <windows.h>
+#include "mano.h"
+
+IDR_MYMENU MENU
+BEGIN
+    POPUP "&Program"
+    BEGIN
+        MENUITEM "E&xit", ID_PROGRAM_EXIT
+        MENUITEM "&Help", ID_PROGRAM_HELP
+    END
+END
+
+"ikona" ICON "starbucks.ico"
+
+MYDIALOG DIALOG 50, 50, 300, 200
+STYLE WS_CAPTION | WS_POPUP | WS_SYSMENU | DS_MODALFRAME
+CAPTION "My Dialog"
+{
+    LTEXT "Description of:", 10000, 5, 5, 130, 10
+    EDITTEXT TEKSTAS, 5, 20, 130, 10
+    DEFPUSHBUTTON "&Close", DIALOG_BUTTON, 5, 145, 60, 15
+}

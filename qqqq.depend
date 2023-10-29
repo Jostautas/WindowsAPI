@@ -1,0 +1,47 @@
+# depslib dependency file v1.0
+1694670350 source:c:\users\tomas plankis\desktop\qqqq\main.cpp
+	<tchar.h>
+	<windows.h>
+	"mano.h"
+
+1694669844 c:\users\tomas plankis\desktop\qqqq\mano.h
+
+1694671702 source:c:\users\tomas plankis\desktop\qqqq\mano.rc
+	"mano.h"
+
+1695274991 source:c:\users\o3\documents\winapi\2pratybos_isdestytojaus\qqqq\main.cpp
+	<tchar.h>
+	<windows.h>
+	"mano.h"
+
+1695277850 c:\users\o3\documents\winapi\2pratybos_isdestytojaus\qqqq\mano.h
+	<windows.h>
+
+1695277601 source:c:\users\o3\documents\winapi\2pratybos_isdestytojaus\qqqq\mano.rc
+	<windows.h>
+	"mano.h"
+
+1697091578 source:c:\users\3\documents\winapi\2pratybos_isdestytojaus\qqqq\main.cpp
+	<tchar.h>
+	<windows.h>
+	"mano.h"
+
+1695274252 c:\users\3\documents\winapi\2pratybos_isdestytojaus\qqqq\mano.h
+	<windows.h>
+
+1695274002 source:c:\users\3\documents\winapi\2pratybos_isdestytojaus\qqqq\mano.rc
+	<windows.h>
+	"mano.h"
+
+1698585355 source:c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\main.cpp
+	<tchar.h>
+	"mano.h"
+	<windows.h>
+
+1698586754 c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\mano.h
+	<windows.h>
+
+1698586754 source:c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\mano.rc
+	<windows.h>
+	"mano.h"
+
