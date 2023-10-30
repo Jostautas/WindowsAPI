@@ -10,16 +10,128 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
+#include <cstdlib>
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK DialogProc(HWND, UINT, WPARAM, LPARAM);
 
 /*  Make the class name into a global variable  */
 TCHAR szClassName[ ] = _T("CodeBlocksWindowsApp");
 
 int tileSize = 70;
 int numOfTiles = 10;
+int score = 0;
+
+bool isABomb(int ButtonID){
+    std::string filename = "bomb_location2.csv";
+    const int maxArraySize = 100;
+
+      HANDLE hFile = CreateFileA(filename.c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        std::cerr << "Failed to open the file: " << filename << std::endl;
+        return 1;
+    }
+
+    DWORD dwFileSize = GetFileSize(hFile, NULL);
+    if (dwFileSize == INVALID_FILE_SIZE || dwFileSize == 0) {
+        CloseHandle(hFile);
+        std::cerr << "File is empty or could not determine file size." << std::endl;
+        return 1;
+    }
+
+    std::vector<int> BombLocations;
+    DWORD bytesRead;
+    char buffer[1024]; // You can adjust the buffer size as needed
+
+    while (ReadFile(hFile, buffer, sizeof(buffer), &bytesRead, NULL) && bytesRead > 0) {
+        for (DWORD i = 0; i < bytesRead; ++i) {
+            if (isdigit(buffer[i])) {
+                int intValue = atoi(&buffer[i]);
+                BombLocations.push_back(intValue);
+                while (i < bytesRead && isdigit(buffer[i])) {
+                    ++i; // Move to the next non-digit character
+                }
+            }
+        }
+    }
+
+    CloseHandle(hFile);
+
+    if((std::find(BombLocations.begin(), BombLocations.end(), ButtonID)) != BombLocations.end()){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+void draw_image(HWND hwnd, int coordX, int coordY){
+    HDC hdc;
+    hdc = GetDC(hwnd);
+    HANDLE bmp = LoadImage(NULL, "bomb3.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    if(bmp==NULL){
+        MessageBox(hwnd, "Failed to load image", "Error", MB_OK|MB_ICONERROR);
+        return;
+    }
+    HDC dcmem = CreateCompatibleDC(NULL);
+    if(SelectObject(dcmem, bmp)==NULL){
+        MessageBox(hwnd, "Failed to upload", "Error", MB_OK|MB_ICONERROR);
+        DeleteDC(dcmem);
+        return;
+    }
+    BITMAP bm;
+    GetObject(bmp, sizeof(bm), &bm);
+    if(BitBlt(hdc, coordX, coordY, 70, 70, dcmem, 0, 0, SRCCOPY) == 0){
+        MessageBox(hwnd, "Failed to blit", "Error", MB_OK|MB_ICONERROR);;
+        DeleteDC(dcmem);
+        return;
+    }
+    DeleteDC(dcmem);
+}
+
+/*BOOL CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam){
+    LPTSTR edittxt;
+    switch(uMsg){
+        case WM_INITDIALOG:
+            return TRUE;
+        case WM_COMMAND:
+            switch(LOWORD(wParam)){
+            case DIALOG_BUTTON:
+                HWND edit = GetDlgItem(hDlg, TEKSTAS);
+                int length = GetWindowTextLength(edit);
+                edittxt = new TCHAR[length+1];
+                GetWindowText(edit, edittxt, length+1);
+                SetWindowText(GetParent(hDlg), edittxt);
+                EndDialog(hDlg, 0);
+                return TRUE;
+            }
+        return TRUE;
+            case WM_CLOSE:
+                EndDialog(hDlg, 0);
+                return TRUE;
+            case WM_DESTROY:
+                EndDialog(hDlg, 0);
+                return TRUE;
+    }
+    return FALSE;
+}*/
+
+INT_PTR CALLBACK DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg) {
+        case WM_INITDIALOG:
+            return TRUE;
+
+        case WM_COMMAND:
+            if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
+                EndDialog(hwnd, LOWORD(wParam));
+                return TRUE;
+            }
+            break;
+    }
+    return FALSE;
+}
+
 
 int WINAPI WinMain (HINSTANCE hThisInstance,
                      HINSTANCE hPrevInstance,
@@ -88,32 +200,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 
 LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    std::string filename = "bomb_location2.csv";
 
-    HANDLE fileHandle = CreateFile(
-        filename.c_str(),
-        GENERIC_READ,
-        FILE_SHARE_READ,
-        NULL,
-        OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL
-    );
-
-    if (fileHandle == INVALID_HANDLE_VALUE) {
-        std::cerr << "Failed to open the file: " << filename << std::endl;
-        return 1;
-    }
-
-    std::vector<int> integerVector;
-    int intValue;
-    DWORD bytesRead;
-
-    while (ReadFile(fileHandle, &intValue, sizeof(int), &bytesRead, NULL) && bytesRead > 0) {
-        integerVector.push_back(intValue);
-    }
-
-    CloseHandle(fileHandle);
 
     switch (message)                  /* handle the messages */
     {
@@ -121,8 +208,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             for (int row = 0; row < numOfTiles; row++) {
                 for (int col = 0; col < numOfTiles; col++) {
                     int buttonID = 1000 + row * numOfTiles + col; // Calculate a unique ID for each button
-                    std::cout << buttonID << std::endl;
-
                     CreateWindow(
                     "BUTTON",
                     "Press me",
@@ -135,13 +220,10 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     );
                 }
             }
-                break;
+            break;
 
         case WM_COMMAND:
             switch(LOWORD(wParam)){
-                case 1000:
-                    DialogBox(NULL, MAKEINTRESOURCE(MYDIALOG), hwnd, (DLGPROC)DialogProc);
-                    break;
                 case ID_PROGRAM_EXIT:
                     SendMessage(hwnd, WM_CLOSE, 0, 0);
                     break;
@@ -149,7 +231,31 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     MessageBox(hwnd, TEXT("Test your luck - click on any one of the tiles"), "Help page", MB_OK);
                     break;
                  default:
-                    DialogBox(NULL, MAKEINTRESOURCE(MYDIALOG), hwnd, (DLGPROC)DialogProc);
+                    if(isABomb(LOWORD(wParam))){
+                        std::cout << LOWORD(wParam) << " is a BOMB. Your score = " << score << std::endl;
+                        score = 0;
+
+                        RECT buttonRect;
+                        HWND hwndButton = GetDlgItem(hwnd, LOWORD(wParam)); // Get the button's handle using its ID
+                        int buttonX, buttonY;
+                        if (hwndButton != NULL) {
+                            GetWindowRect(hwndButton, &buttonRect); // Get the screen coordinates of the button
+
+                            // Convert the screen coordinates to client coordinates of the parent window
+                            ScreenToClient(hwnd, (LPPOINT)&buttonRect);
+                            ScreenToClient(hwnd, ((LPPOINT)&buttonRect) + 1);
+
+                            buttonX = buttonRect.left;
+                            buttonY = buttonRect.top;
+                        }
+                        draw_image(hwnd, buttonX, buttonY);
+                        //MessageBox(hwnd, TEXT("Test your luck - click on any one of the tiles"), "Help page", MB_OK);
+                        //DialogBox(NULL, MAKEINTRESOURCE(MYDIALOG), hwnd, (DLGPROC)DialogProc);
+                        system("pause");
+                    }
+                    else{
+                        score++;
+                    }
                     break;
             }
             break;
@@ -161,31 +267,4 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     }
 
     return 0;
-}
-
-BOOL CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam){
-    LPTSTR edittxt;
-    switch(uMsg){
-        case WM_INITDIALOG:
-            return TRUE;
-        case WM_COMMAND:
-            switch(LOWORD(wParam)){
-            case DIALOG_BUTTON:
-                HWND edit = GetDlgItem(hDlg, TEKSTAS);
-                int length = GetWindowTextLength(edit);
-                edittxt = new TCHAR[length+1];
-                GetWindowText(edit, edittxt, length+1);
-                SetWindowText(GetParent(hDlg), edittxt);
-                EndDialog(hDlg, 0);
-                return TRUE;
-            }
-        return TRUE;
-            case WM_CLOSE:
-                EndDialog(hDlg, 0);
-                return TRUE;
-            case WM_DESTROY:
-                EndDialog(hDlg, 0);
-                return TRUE;
-    }
-    return FALSE;
 }

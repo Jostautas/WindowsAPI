@@ -33,15 +33,19 @@
 	<windows.h>
 	"mano.h"
 
-1698585355 source:c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\main.cpp
+1698599979 source:c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\main.cpp
 	<tchar.h>
 	"mano.h"
 	<windows.h>
+	<iostream>
+	<fstream>
+	<vector>
+	<algorithm>
 
-1698586754 c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\mano.h
+1698589404 c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\mano.h
 	<windows.h>
 
-1698586754 source:c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\mano.rc
+1698589404 source:c:\users\3\documents\winapi\lw_jostautas_sakas\windowsapi\mano.rc
 	<windows.h>
 	"mano.h"
 
