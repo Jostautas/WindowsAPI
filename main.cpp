@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
+#include "winapidll.h"
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
@@ -23,6 +24,7 @@ int tileSize = 70;
 int numOfTiles = 10;
 int score = 0;
 
+/*
 bool isABomb(int ButtonID){
     std::string filename = "bomb_location2.csv";
     const int maxArraySize = 100;
@@ -64,7 +66,7 @@ bool isABomb(int ButtonID){
     else{
         return false;
     }
-}
+}*/
 
 void draw_image(HWND hwnd, int coordX, int coordY){
     HDC hdc;
@@ -89,49 +91,6 @@ void draw_image(HWND hwnd, int coordX, int coordY){
     }
     DeleteDC(dcmem);
 }
-
-/*BOOL CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam){
-    LPTSTR edittxt;
-    switch(uMsg){
-        case WM_INITDIALOG:
-            return TRUE;
-        case WM_COMMAND:
-            switch(LOWORD(wParam)){
-            case DIALOG_BUTTON:
-                HWND edit = GetDlgItem(hDlg, TEKSTAS);
-                int length = GetWindowTextLength(edit);
-                edittxt = new TCHAR[length+1];
-                GetWindowText(edit, edittxt, length+1);
-                SetWindowText(GetParent(hDlg), edittxt);
-                EndDialog(hDlg, 0);
-                return TRUE;
-            }
-        return TRUE;
-            case WM_CLOSE:
-                EndDialog(hDlg, 0);
-                return TRUE;
-            case WM_DESTROY:
-                EndDialog(hDlg, 0);
-                return TRUE;
-    }
-    return FALSE;
-}*/
-
-INT_PTR CALLBACK DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
-        case WM_INITDIALOG:
-            return TRUE;
-
-        case WM_COMMAND:
-            if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
-                EndDialog(hwnd, LOWORD(wParam));
-                return TRUE;
-            }
-            break;
-    }
-    return FALSE;
-}
-
 
 int WINAPI WinMain (HINSTANCE hThisInstance,
                      HINSTANCE hPrevInstance,
@@ -195,14 +154,13 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     return messages.wParam;
 }
 
-
 /*  This function is called by the Windows function DispatchMessage()  */
 
 LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
 
-    switch (message)                  /* handle the messages */
+    switch (message)
     {
         case WM_CREATE:
             for (int row = 0; row < numOfTiles; row++) {
@@ -231,7 +189,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     MessageBox(hwnd, TEXT("Test your luck - click on any one of the tiles"), "Help page", MB_OK);
                     break;
                  default:
-                    if(isABomb(LOWORD(wParam))){
+                    if(dllspec::dllclass::isABomb(LOWORD(wParam))){
                         std::cout << LOWORD(wParam) << " is a BOMB. Your score = " << score << std::endl;
                         score = 0;
 
@@ -249,8 +207,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                             buttonY = buttonRect.top;
                         }
                         draw_image(hwnd, buttonX, buttonY);
-                        //MessageBox(hwnd, TEXT("Test your luck - click on any one of the tiles"), "Help page", MB_OK);
-                        //DialogBox(NULL, MAKEINTRESOURCE(MYDIALOG), hwnd, (DLGPROC)DialogProc);
                         system("pause");
                     }
                     else{

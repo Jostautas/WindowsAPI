@@ -27,6 +27,24 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
+			<Target title="winapidll">
+				<Option output="bin/winapidll/qqqq" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/winapidll/" />
+				<Option object_output="obj/winapidll/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-DBUILD_DLL" />
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="user32" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -37,11 +55,13 @@
 			<Add library="kernel32" />
 			<Add library="comctl32" />
 		</Linker>
+		<Unit filename="bin/Debug/winapidll.dll" />
 		<Unit filename="main.cpp" />
 		<Unit filename="mano.h" />
 		<Unit filename="mano.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
+		<Unit filename="winapidll.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
