@@ -24,54 +24,10 @@ int tileSize = 70;
 int numOfTiles = 10;
 int score = 0;
 
-/*
-bool isABomb(int ButtonID){
-    std::string filename = "bomb_location2.csv";
-    const int maxArraySize = 100;
-
-      HANDLE hFile = CreateFileA(filename.c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hFile == INVALID_HANDLE_VALUE) {
-        std::cerr << "Failed to open the file: " << filename << std::endl;
-        return 1;
-    }
-
-    DWORD dwFileSize = GetFileSize(hFile, NULL);
-    if (dwFileSize == INVALID_FILE_SIZE || dwFileSize == 0) {
-        CloseHandle(hFile);
-        std::cerr << "File is empty or could not determine file size." << std::endl;
-        return 1;
-    }
-
-    std::vector<int> BombLocations;
-    DWORD bytesRead;
-    char buffer[1024]; // You can adjust the buffer size as needed
-
-    while (ReadFile(hFile, buffer, sizeof(buffer), &bytesRead, NULL) && bytesRead > 0) {
-        for (DWORD i = 0; i < bytesRead; ++i) {
-            if (isdigit(buffer[i])) {
-                int intValue = atoi(&buffer[i]);
-                BombLocations.push_back(intValue);
-                while (i < bytesRead && isdigit(buffer[i])) {
-                    ++i; // Move to the next non-digit character
-                }
-            }
-        }
-    }
-
-    CloseHandle(hFile);
-
-    if((std::find(BombLocations.begin(), BombLocations.end(), ButtonID)) != BombLocations.end()){
-        return true;
-    }
-    else{
-        return false;
-    }
-}*/
-
 void draw_image(HWND hwnd, int coordX, int coordY){
     HDC hdc;
     hdc = GetDC(hwnd);
-    HANDLE bmp = LoadImage(NULL, "bomb3.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    HANDLE bmp = LoadImage(NULL, "square3.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     if(bmp==NULL){
         MessageBox(hwnd, "Failed to load image", "Error", MB_OK|MB_ICONERROR);
         return;
@@ -85,11 +41,12 @@ void draw_image(HWND hwnd, int coordX, int coordY){
     BITMAP bm;
     GetObject(bmp, sizeof(bm), &bm);
     if(BitBlt(hdc, coordX, coordY, 70, 70, dcmem, 0, 0, SRCCOPY) == 0){
-        MessageBox(hwnd, "Failed to blit", "Error", MB_OK|MB_ICONERROR);;
+        MessageBox(hwnd, "Failed to buid", "Error", MB_OK|MB_ICONERROR);;
         DeleteDC(dcmem);
         return;
     }
     DeleteDC(dcmem);
+    CloseHandle(hdc);
 }
 
 int WINAPI WinMain (HINSTANCE hThisInstance,
@@ -179,7 +136,12 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                 }
             }
             break;
-
+        //case WM_PAINT:
+        //    break;
+        // padaryt DLLus dinamiskus, nes db statiniai
+        // paspaudus ne bomba, kazka nupiest
+        // irasyt i faila highscora
+        // Bombos nupiesima riektu perkelt i WM_PAINT
         case WM_COMMAND:
             switch(LOWORD(wParam)){
                 case ID_PROGRAM_EXIT:
@@ -189,12 +151,12 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     MessageBox(hwnd, TEXT("Test your luck - click on any one of the tiles"), "Help page", MB_OK);
                     break;
                  default:
+                    RECT buttonRect;
+                    HWND hwndButton = GetDlgItem(hwnd, LOWORD(wParam)); // Get the button's handle using its ID
+
                     if(dllspec::dllclass::isABomb(LOWORD(wParam))){
                         std::cout << LOWORD(wParam) << " is a BOMB. Your score = " << score << std::endl;
                         score = 0;
-
-                        RECT buttonRect;
-                        HWND hwndButton = GetDlgItem(hwnd, LOWORD(wParam)); // Get the button's handle using its ID
                         int buttonX, buttonY;
                         if (hwndButton != NULL) {
                             GetWindowRect(hwndButton, &buttonRect); // Get the screen coordinates of the button
@@ -207,10 +169,11 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                             buttonY = buttonRect.top;
                         }
                         draw_image(hwnd, buttonX, buttonY);
-                        system("pause");
+                        //system("pause");
                     }
                     else{
                         score++;
+                        SetWindowText(hwndButton, "");
                     }
                     break;
             }
